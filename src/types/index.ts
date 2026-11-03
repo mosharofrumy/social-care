@@ -1,7 +1,3 @@
-/**
- * Barrel for the `src/types` folder — consumers import everything
- * type-related from `@/types`.
- */
 
 export * from "./event";
 export * from "./status";

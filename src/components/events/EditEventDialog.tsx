@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import EventForm from "@/components/events/EventForm";
 import { API_BASE_URL } from "@/lib/api";
+import { authenticatedFetch } from "@/lib/authenticated-fetch";
 import type {
   EditEventDialogProps,
   EventFormPayload,
@@ -37,11 +38,14 @@ export default function EditEventDialog({
     setSaving(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/events/${event._id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await authenticatedFetch(
+        `${API_BASE_URL}/events/${event._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
 
       if (!response.ok) {
         throw new Error(

@@ -7,12 +7,14 @@ import {
   CalendarDays,
   MapPin,
   Plus,
+  Pencil,
   RefreshCw,
   Search,
   Users,
 } from "lucide-react";
 
 import { API_BASE_URL, formatEventDate } from "@/lib/api";
+import { useTodayISO } from "@/hooks/use-today-iso";
 import { EVENT_TYPES, type EventItem, type AsyncStatus } from "@/types";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -28,6 +30,7 @@ const eventTypeFilters = Array.from(
 
 export default function EventsPage() {
   const { data: session } = authClient.useSession();
+  const today = useTodayISO();
   const myEmail = (session?.user?.email ?? "").trim().toLowerCase();
   const [events, setEvents] = React.useState<EventItem[]>([]);
   const [state, setState] = React.useState<AsyncStatus>("loading");
@@ -69,7 +72,8 @@ export default function EventsPage() {
   }
 
   const normalizedSearch = search.trim().toLowerCase();
-  const visibleEvents = events.filter((event) => {
+  const upcomingEvents = events.filter((event) => event.date >= today);
+  const visibleEvents = upcomingEvents.filter((event) => {
     const matchesType =
       selectedType === "All" ||
       (selectedType === "Emergency"
@@ -204,16 +208,16 @@ export default function EventsPage() {
           </div>
         )}
 
-        {state === "ready" && events.length === 0 && (
+        {state === "ready" && upcomingEvents.length === 0 && (
           <div className="mt-12 rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center dark:border-gray-700 dark:bg-gray-900">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-950">
               <Plus size={26} className="text-[#176B50] dark:text-emerald-400" />
             </div>
             <h2 className="mt-5 text-xl font-black text-gray-900 dark:text-white">
-              No events published yet
+              No upcoming events
             </h2>
             <p className="mx-auto mt-2 max-w-sm text-sm text-gray-600 dark:text-gray-400">
-              Be the first to bring the community together — publish your event
+              Be the first to bring the community together — publish an event
               in a couple of minutes.
             </p>
             <Link
@@ -225,16 +229,18 @@ export default function EventsPage() {
           </div>
         )}
 
-        {state === "ready" && events.length > 0 && visibleEvents.length === 0 && (
-          <div className="mt-12 rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center dark:border-gray-700 dark:bg-gray-900">
-            <h2 className="text-xl font-black text-gray-900 dark:text-white">
-              No matching events
-            </h2>
-            <p className="mx-auto mt-2 max-w-sm text-sm text-gray-600 dark:text-gray-400">
-              Try a different search term.
-            </p>
-          </div>
-        )}
+        {state === "ready" &&
+          upcomingEvents.length > 0 &&
+          visibleEvents.length === 0 && (
+            <div className="mt-12 rounded-2xl border border-dashed border-gray-300 bg-white px-6 py-12 text-center dark:border-gray-700 dark:bg-gray-900">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white">
+                No matching events
+              </h2>
+              <p className="mx-auto mt-2 max-w-sm text-sm text-gray-600 dark:text-gray-400">
+                Try a different search term.
+              </p>
+            </div>
+          )}
 
         {state === "ready" && visibleEvents.length > 0 && (
           <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -327,11 +333,22 @@ function EventCard({
         <div className="mt-5 flex items-center gap-3">
           <Link
             href={`/events/${event._id}`}
-            className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#176B50] px-5 text-sm font-extrabold text-white shadow-md shadow-emerald-900/10 transition-all duration-200 hover:bg-[#12543E] hover:shadow-lg"
+            className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#176B50] px-5 text-sm font-extrabold text-white shadow-md shadow-emerald-900/10 transition-all duration-200 hover:bg-[#12543E] hover:shadow-lg ${
+              canManage ? "flex-1" : "w-full"
+            }`}
           >
             View Details
             <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
           </Link>
+          {canManage && (
+            <Link
+              href={`/events/${event._id}/edit`}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 text-sm font-bold text-gray-800 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-950 dark:text-gray-100 dark:hover:bg-gray-800"
+            >
+              <Pencil size={15} />
+              Edit
+            </Link>
+          )}
         </div>
       </div>
     </div>

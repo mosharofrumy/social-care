@@ -16,7 +16,17 @@ import {
   Users,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { API_BASE_URL, formatEventDate, todayISO } from "@/lib/api";
+import { authenticatedFetch } from "@/lib/authenticated-fetch";
 import type { EventItem, EventLoadState } from "@/types";
 import { authClient } from "@/lib/auth-client";
 import EditEventDialog from "@/components/events/EditEventDialog";
@@ -33,6 +43,8 @@ export default function EventDetailsPage() {
   const [reloadKey, setReloadKey] = React.useState(0);
   const [joinPending, setJoinPending] = React.useState(false);
   const [deletePending, setDeletePending] = React.useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [deleteError, setDeleteError] = React.useState<string | null>(null);
   const [editOpen, setEditOpen] = React.useState(false);
   const [actionError, setActionError] = React.useState<string | null>(null);
 
@@ -41,7 +53,6 @@ export default function EventDetailsPage() {
     if (!id) return;
 
     let cancelled = false;
-
     async function loadEvent() {
       try {
         const response = await fetch(`${API_BASE_URL}/events/${id}`);
@@ -88,7 +99,7 @@ export default function EventDetailsPage() {
     !!event &&
     (event.participants ?? []).some(
       (participant) =>
-        participant.trim().toLowerCase() === user.email.trim().toLowerCase()
+        participant.trim().toLowerCase() === user.email.trim().toLowerCase(),
     );
 
   const isUpcoming = !!event && event.date >= todayISO();
@@ -101,11 +112,11 @@ export default function EventDetailsPage() {
     setJoinPending(true);
 
     try {
-      const response = await fetch(
+      const response = await authenticatedFetch(
         `${API_BASE_URL}/events/${event._id}/${isJoined ? "leave" : "join"}`,
         {
           method: "POST",
-        }
+        },
       );
 
       if (!response.ok) {
@@ -117,11 +128,11 @@ export default function EventDetailsPage() {
       toast.success(
         isJoined
           ? `You left "${event.title}".`
-          : `You joined "${event.title}".`
+          : `You joined "${event.title}".`,
       );
     } catch (err) {
       setActionError(
-        err instanceof Error ? err.message : "Something went wrong."
+        err instanceof Error ? err.message : "Something went wrong.",
       );
     } finally {
       setJoinPending(false);
@@ -131,28 +142,27 @@ export default function EventDetailsPage() {
   async function handleDelete() {
     if (!user || !event) return;
 
-    const confirmed = window.confirm(
-      "Delete this event permanently? This action cannot be undone."
-    );
-    if (!confirmed) return;
-
-    setActionError(null);
+    setDeleteError(null);
     setDeletePending(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/events/${event._id}`, {
-        method: "DELETE",
-      });
+      const response = await authenticatedFetch(
+        `${API_BASE_URL}/events/${event._id}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       if (!response.ok) {
         throw new Error((await response.text()) || "Failed to delete");
       }
 
       toast.success(`"${event.title}" has been deleted.`);
+      setDeleteDialogOpen(false);
       router.replace("/events");
     } catch (err) {
-      setActionError(
-        err instanceof Error ? err.message : "Something went wrong."
+      setDeleteError(
+        err instanceof Error ? err.message : "Something went wrong.",
       );
       setDeletePending(false);
     }
@@ -280,7 +290,9 @@ export default function EventDetailsPage() {
                       Volunteers
                     </p>
                     <p className="truncate text-sm font-bold text-gray-900 dark:text-white">
-                      {joinedCount > 0 ? `${joinedCount} joined` : "Open to all"}
+                      {joinedCount > 0
+                        ? `${joinedCount} joined`
+                        : "Open to all"}
                     </p>
                   </div>
                 </div>
@@ -324,7 +336,10 @@ export default function EventDetailsPage() {
 
                     <button
                       type="button"
-                      onClick={handleDelete}
+                      onClick={() => {
+                        setDeleteError(null);
+                        setDeleteDialogOpen(true);
+                      }}
                       disabled={deletePending}
                       className="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-rose-50 px-5 text-sm font-bold text-rose-700 transition-colors hover:bg-rose-600 hover:text-white dark:bg-rose-950/50 dark:text-rose-400 dark:hover:bg-rose-600 dark:hover:text-white"
                     >
@@ -417,6 +432,55 @@ export default function EventDetailsPage() {
             onSaved={(updated) => setEvent(updated)}
           />
         )}
+
+        <Dialog
+          open={deleteDialogOpen}
+          onOpenChange={(open) => {
+            if (!deletePending) {
+              setDeleteDialogOpen(open);
+              if (!open) setDeleteError(null);
+            }
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete event?</DialogTitle>
+              <DialogDescription>
+                Delete &ldquo;{event?.title}&rdquo; permanently? This action
+                cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+
+            {deleteError && (
+              <p
+                role="alert"
+                className="rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 dark:bg-rose-950/50 dark:text-rose-400"
+              >
+                {deleteError}
+              </p>
+            )}
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={deletePending}
+                onClick={() => setDeleteDialogOpen(false)}
+                className="rounded-xl"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                disabled={deletePending}
+                onClick={handleDelete}
+                className="rounded-xl bg-rose-600 text-white hover:bg-rose-700"
+              >
+                {deletePending ? "Deleting..." : "Delete Event"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </main>
   );

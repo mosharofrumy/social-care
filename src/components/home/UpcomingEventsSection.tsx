@@ -5,18 +5,16 @@ import { ArrowRight, CalendarDays, MapPin, Plus } from "lucide-react";
 
 import { useEvents } from "@/hooks/use-events";
 import { authClient } from "@/lib/auth-client";
-import { todayISO, formatEventDate } from "@/lib/api";
+import { formatEventDate } from "@/lib/api";
 import { Pencil } from "lucide-react";
 
 export default function UpcomingEventsSection() {
-  const { events, status, retry } = useEvents();
+  const { events: upcoming, status, retry } = useEvents({
+    upcomingOnly: true,
+  });
   const myEmail = (authClient.useSession().data?.user?.email ?? "")
     .trim()
     .toLowerCase();
-
-  const upcoming = events
-    .filter((event) => event.date >= todayISO())
-    .slice(0, 9); // 3x3 grid
 
   return (
     <section className="bg-white py-16 transition-colors dark:bg-gray-950 sm:py-20">

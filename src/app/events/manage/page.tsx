@@ -31,6 +31,7 @@ import {
   normalizeEmail,
   todayISO,
 } from "@/lib/api";
+import { authenticatedFetch } from "@/lib/authenticated-fetch";
 import type { EventItem } from "@/types";
 import { toast } from "sonner";
 
@@ -77,7 +78,7 @@ export default function ManageEventsPage() {
     setDeletingId(deleteTarget._id);
 
     try {
-      const response = await fetch(
+      const response = await authenticatedFetch(
         `${API_BASE_URL}/events/${deleteTarget._id}`,
         {
           method: "DELETE",

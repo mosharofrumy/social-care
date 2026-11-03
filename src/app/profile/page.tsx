@@ -47,14 +47,20 @@ export default function ProfilePage() {
   // fields fall back to whatever the session currently holds.
   const name = edits.name ?? user?.name ?? "";
   const photoUrl = edits.photoUrl ?? user?.image ?? "";
+  const hasChanges =
+    !!user &&
+    (name.trim() !== user.name.trim() ||
+      photoUrl.trim() !== (user.image ?? "").trim());
 
   const setName = (value: string) => {
     setEdits((prev) => ({ ...prev, name: value }));
+    setSuccess(null);
     setFieldErrors((current) => ({ ...current, name: undefined }));
   };
 
   const setPhotoUrl = (value: string) => {
     setEdits((prev) => ({ ...prev, photoUrl: value }));
+    setSuccess(null);
     setFieldErrors((current) => ({ ...current, photoUrl: undefined }));
   };
 
@@ -75,6 +81,10 @@ export default function ProfilePage() {
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
+      return;
+    }
+
+    if (!hasChanges) {
       return;
     }
 
@@ -236,7 +246,7 @@ export default function ProfilePage() {
             {/* Save */}
             <Button
               type="submit"
-              disabled={saving}
+              disabled={saving || !hasChanges}
               className="h-12 w-full gap-2 rounded-xl bg-[#176B50] text-sm font-extrabold text-white shadow-md shadow-emerald-900/10 transition-all duration-200 hover:bg-[#12543E] hover:shadow-lg"
             >
               {saving && <LoaderCircle size={18} className="animate-spin" />}

@@ -5,12 +5,19 @@
 
 export const API_BASE_URL = "/api";
 
-/** Local today as YYYY-MM-DD (timezone-safe). */
+/** Bangladesh's current date as YYYY-MM-DD. */
 export function todayISO() {
-  const now = new Date();
-  return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 10);
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Dhaka",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const values = parts.reduce<Record<string, string>>((result, part) => {
+    result[part.type] = part.value;
+    return result;
+  }, {});
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
 /** Friendly date, e.g. "Monday, December 7, 2026". */

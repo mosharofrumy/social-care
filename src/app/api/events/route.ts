@@ -1,13 +1,20 @@
 import { EVENT_BADGES, EVENT_TYPES } from "@/types";
 import {
   eventsCollection,
+  getTodayDate,
   getCurrentUser,
   isEventPayload,
   serializeEvent,
 } from "@/lib/events";
 
-export async function GET() {
-  const events = await eventsCollection.find().sort({ date: 1 }).toArray();
+export async function GET(request: Request) {
+  const isHomeQuery =
+    new URL(request.url).searchParams.get("view") === "home";
+  const query = isHomeQuery ? { date: { $gte: getTodayDate() } } : {};
+  const cursor = eventsCollection.find(query).sort({ date: 1 });
+  const events = isHomeQuery
+    ? await cursor.limit(6).toArray()
+    : await cursor.toArray();
   return Response.json(events.map(serializeEvent));
 }
 

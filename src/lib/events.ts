@@ -1,5 +1,6 @@
 import { ObjectId, type WithId } from "mongodb";
 
+import { todayISO } from "@/lib/api";
 import { auth, db } from "@/lib/auth";
 import type { EventFormPayload, EventItem } from "@/types";
 
@@ -15,45 +16,51 @@ export function serializeEvent(event: WithId<EventDocument>): EventItem {
   return { ...event, _id: event._id.toHexString() };
 }
 
+export function getTodayDate() {
+  return todayISO();
+}
+
+export function isValidEventDate(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+    !Number.isNaN(Date.parse(`${value}T00:00:00.000Z`)) &&
+    new Date(`${value}T00:00:00.000Z`).toISOString().slice(0, 10) === value &&
+    value >= getTodayDate()
+  );
+}
+
 export async function getCurrentUser(request: Request) {
   const authorization = request.headers.get("authorization");
+  const bearerToken = /^Bearer\s+(\S+)$/i.exec(authorization ?? "")?.[1];
+  if (!bearerToken) return null;
 
-  if (authorization !== null) {
-    const bearerToken = /^Bearer\s+(\S+)$/i.exec(authorization)?.[1];
-    if (!bearerToken) return null;
-
-    const { payload } = await auth.api.verifyJWT({
+  let payload: { sub?: string } | null;
+  try {
+    ({ payload } = await auth.api.verifyJWT({
       body: { token: bearerToken },
-    });
-    if (!payload?.sub) return null;
-
-    const context = await auth.$context;
-    return context.adapter.findOne<{
-      id: string;
-      name: string;
-      email: string;
-      image?: string | null;
-    }>({
-      model: "user",
-      where: [{ field: "id", value: payload.sub }],
-    });
+    }));
+  } catch {
+    return null;
   }
+  if (!payload?.sub) return null;
 
-  const session = await auth.api.getSession({ headers: request.headers });
-  return session?.user ?? null;
+  const context = await auth.$context;
+  return context.adapter.findOne<{
+    id: string;
+    name: string;
+    email: string;
+    image?: string | null;
+  }>({
+    model: "user",
+    where: [{ field: "id", value: payload.sub }],
+  });
 }
 
 export function isEventPayload(value: unknown): value is EventFormPayload {
   if (!value || typeof value !== "object") return false;
 
   const payload = value as Record<string, unknown>;
-  const date =
-    typeof payload.date === "string" &&
-    /^\d{4}-\d{2}-\d{2}$/.test(payload.date) &&
-    !Number.isNaN(Date.parse(`${payload.date}T00:00:00.000Z`)) &&
-    new Date(`${payload.date}T00:00:00.000Z`).toISOString().slice(0, 10) ===
-      payload.date;
-
   let validThumbnail = false;
   if (typeof payload.thumbnailUrl === "string") {
     try {
@@ -69,7 +76,7 @@ export function isEventPayload(value: unknown): value is EventFormPayload {
     payload.title.trim().length >= 3 &&
     typeof payload.type === "string" &&
     typeof payload.badge === "string" &&
-    date &&
+    isValidEventDate(payload.date) &&
     validThumbnail &&
     typeof payload.description === "string" &&
     payload.description.trim().length >= 10 &&

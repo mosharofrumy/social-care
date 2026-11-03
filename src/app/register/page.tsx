@@ -42,12 +42,8 @@ const passwordRules = [
     test: (value: string) => /[a-z]/.test(value),
   },
   {
-    label: "At least 8 characters",
-    test: (value: string) => value.length >= 8,
-  },
-  {
-    label: "No more than 128 characters",
-    test: (value: string) => value.length <= 128,
+    label: "At least 6 characters",
+    test: (value: string) => value.length >= 6,
   },
 ] as const;
 
@@ -87,7 +83,7 @@ export default function RegisterPage() {
     }
     if (!passwordRules.every((rule) => rule.test(submittedPassword))) {
       errors.password =
-        "Your password must be 8–128 characters and include uppercase and lowercase letters.";
+        "Your password must be at least 6 characters and include uppercase and lowercase letters.";
     }
     if (submittedPhotoUrl && !isValidHttpUrl(submittedPhotoUrl)) {
       errors.photoUrl = "Enter a valid http(s) profile photo URL.";

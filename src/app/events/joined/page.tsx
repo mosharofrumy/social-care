@@ -21,6 +21,7 @@ import {
   normalizeEmail,
   todayISO,
 } from "@/lib/api";
+import { authenticatedFetch } from "@/lib/authenticated-fetch";
 import type { EventItem } from "@/types";
 import { toast } from "sonner";
 
@@ -73,7 +74,7 @@ export default function JoinedEventsPage() {
     setLeavingId(eventItem._id);
 
     try {
-      const response = await fetch(
+      const response = await authenticatedFetch(
         `${API_BASE_URL}/events/${eventItem._id}/leave`,
         {
           method: "POST",

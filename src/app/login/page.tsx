@@ -182,12 +182,11 @@ export default function LoginPage() {
                   Password
                 </Label>
 
-                <Link
-                  href="/forgot-password"
-                  className="text-xs font-bold text-emerald-700 transition-colors hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300"
+                <span
+                  className="cursor-pointer text-xs font-bold text-emerald-700 transition-colors hover:text-emerald-600 dark:text-emerald-400 dark:hover:text-emerald-300"
                 >
                   Forgot password?
-                </Link>
+                </span>
               </div>
 
               <div className="relative mt-2">
