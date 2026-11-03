@@ -1,78 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🤝 SocialCare — Social Development & Community Service Platform
 
-## Getting Started
+**SocialCare** is a community-driven event management platform where individuals, volunteers, and organizations can create, join, track, and manage social development and service events in their local areas (e.g., Winter Clothes Distribution, Plantation Drives, Clean-up Campaigns, Blood Donation, Emergency Relief, etc.).
 
-First, run the development server:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Key Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Here are five key highlights of the **SocialCare** platform:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. 🗓️ **Upcoming & Past-Filtered Event Directory:** View real-time community events in clean card layouts. The platform automatically filters out expired events and displays upcoming initiatives sorted chronologically.
+2. 🔐 **Robust Authentication & Protected APIs:** Full email/password and social login support using **BetterAuth / JWT validation**, complete with custom middleware guarding private routes and server endpoints.
+3. 🛠️ **Organizer Dashboard (Manage Events):** Event creators have strict authorization rights to update or delete their own created events, ensuring zero unauthorized mutations by other users.
+4. 🤝 **One-Click Event Joining & Tracking:** Volunteers can seamlessly join or leave public events. Dynamic database updates keep track of current participant rosters and list all joined events on a personalized user dashboard.
+5. 🌗 **Interactive Theme Customization (Dark/Light Mode):** Seamless full-system theme toggling (Light & Dark) designed with custom UI components, responsive layout systems, and zero hydration mismatches.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## JWTs for API clients
+## 🛠️ Tech Stack & Technologies Used
 
-The app uses Better Auth sessions for its browser login flow. The JWT plugin is
-available when an authenticated client needs a bearer token for an API:
+### **Frontend (Client)**
+* **Framework:** Next.js (App Router)
+* **Language:** TypeScript / JavaScript
+* **Styling & UI:** Tailwind CSS, Shadcn UI
+* **Icons:** Lucide React
+* **State & Auth:** Better Auth / NextAuth, React Context API
 
-- `GET /api/auth/token` returns a short-lived JWT for the signed-in user. The
-  request must include the user's Better Auth session cookie.
-- `GET /api/auth/jwks` publishes the public keys services can use to verify
-  tokens. Keep private signing keys in the Better Auth database; never share
-  them with clients.
+### **Backend (Server)**
+* **Runtime:** Node.js
+* **Framework:** Express.js
+* **Database:** MongoDB Atlas (MongoClient, Replica Sets, Native Indexing)
+* **Security & Auth:** JSON Web Tokens (JWT), CORS, Environment Configuration (`dotenv`)
 
-For example, after the user signs in:
+### **Hosting & Deployment**
+* **Client Hosting:** Vercel
+* **Server Hosting:** Render / Vercel
 
-```ts
-const response = await fetch("/api/auth/token", {
-  credentials: "include",
-});
+---
 
-if (!response.ok) {
-  throw new Error("Unable to get an access token");
-}
+## ⚡ Additional Highlights & Challenges Implemented
 
-const { token } = (await response.json()) as { token: string };
-```
+* **Strict Form & Data Validation:** Complete validation logic on both client and server sides preventing past-date inputs, invalid image URLs, or weak passwords.
+* **Database Unique Constraints:** Implemented MongoDB compound unique indexes on `{ eventId: 1, "user.email": 1 }` to prevent duplicate event registrations.
+* **Responsive Grid System:** Fully optimized UI tailored for Desktop, Tablet, and Mobile devices with uniform cards, consistent visual hierarchy, and dynamic images.
+* **No Default Browser Alerts:** Custom Toast notifications and SweetAlert2 interfaces used for all success/error user feedback.
 
-Pass the token in the API request's `Authorization` header. Validate its
-signature and audience (`social-care-api`) using the JWKS endpoint.
-Tokens expire after 15 minutes by default. Keep tokens in memory rather than
-persistent browser storage. The existing cookie-based session flow remains the
-default for this app's browser pages.
-
-## Events API
-
-Event data is served from this app's `/api/events` routes and stored in the
-MongoDB `socialcare.events` collection. Reading events is public. Creating,
-joining, leaving, editing, and deleting events use the Better Auth session
-cookie or a valid Better Auth JWT in `Authorization: Bearer <token>`; edit and
-delete requests are restricted to the event organizer. Get a JWT from
-`GET /api/auth/token` using the signed-in session. The API validates its
-signature, issuer, audience, and expiration against Better Auth's JWKS before
-using the token's subject to load the current user.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
