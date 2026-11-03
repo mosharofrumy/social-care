@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   CalendarCheck,
   CalendarDays,
@@ -39,9 +39,22 @@ const eventMenuItems = [
 
 const Navbar = () => {
   const router = useRouter();
-  const { data: session, isPending } = authClient.useSession();
+  const pathname = usePathname();
+  const { data: session, isPending, refetch } = authClient.useSession();
   const [menuOpen, setMenuOpen] = React.useState(false);
   const user = session?.user ?? null;
+  const previousPathname = React.useRef(pathname);
+
+  React.useEffect(() => {
+    const returnedFromAuthPage =
+      previousPathname.current === "/login" ||
+      previousPathname.current === "/register";
+    previousPathname.current = pathname;
+
+    if (returnedFromAuthPage) {
+      void refetch();
+    }
+  }, [pathname, refetch]);
 
   if (isPending) {
     return (
@@ -140,7 +153,9 @@ const Navbar = () => {
                       src={user.image}
                     />
                   )}
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                  <AvatarFallback>
+                    {(user.name || user.email).charAt(0).toUpperCase()}
+                  </AvatarFallback>
                 </Avatar>
 
                 {/* Chevrons replace the green status dot:
@@ -170,12 +185,14 @@ const Navbar = () => {
                         src={user.image}
                       />
                     )}
-                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback>
+                      {(user.name || user.email).charAt(0).toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
 
                   <div className="min-w-0 flex-1">
                     <PopoverTitle className="truncate font-bold text-gray-900 dark:text-white">
-                      {user.name}
+                      {user.name || user.email}
                     </PopoverTitle>
                     <PopoverDescription className="truncate text-xs">
                       {user.email}

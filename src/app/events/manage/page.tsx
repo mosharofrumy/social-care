@@ -81,8 +81,6 @@ export default function ManageEventsPage() {
         `${API_BASE_URL}/events/${deleteTarget._id}`,
         {
           method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ organizerEmail: user?.email ?? "" }),
         }
       );
 
@@ -184,7 +182,7 @@ export default function ManageEventsPage() {
               Could not load your events.
             </p>
             <p className="mt-1 text-sm text-rose-600/80 dark:text-rose-400/70">
-              Make sure the Social Care API server is running, then try again.
+              Please try again in a moment.
             </p>
 
             <Button

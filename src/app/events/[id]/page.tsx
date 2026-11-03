@@ -105,8 +105,6 @@ export default function EventDetailsPage() {
         `${API_BASE_URL}/events/${event._id}/${isJoined ? "leave" : "join"}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ participantEmail: user.email }),
         }
       );
 
@@ -144,8 +142,6 @@ export default function EventDetailsPage() {
     try {
       const response = await fetch(`${API_BASE_URL}/events/${event._id}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ organizerEmail: user.email }),
       });
 
       if (!response.ok) {
@@ -192,7 +188,7 @@ export default function EventDetailsPage() {
               Could not load this event.
             </p>
             <p className="mt-1 text-sm text-rose-600/80 dark:text-rose-400/70">
-              Make sure the Social Care API server is running, then try again.
+              Please try again in a moment.
             </p>
 
             <button

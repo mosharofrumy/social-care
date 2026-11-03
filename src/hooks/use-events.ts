@@ -6,7 +6,7 @@ import { API_BASE_URL } from "@/lib/api";
 import type { AsyncStatus, EventItem } from "@/types";
 
 /**
- * Fetches all events from the Social Care API.
+ * Fetches all events from this app's event API.
  * All setState calls happen in async continuations (never synchronously
  * inside the effect body), which the React Compiler rules require.
  */

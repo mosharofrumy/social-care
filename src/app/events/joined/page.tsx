@@ -77,8 +77,6 @@ export default function JoinedEventsPage() {
         `${API_BASE_URL}/events/${eventItem._id}/leave`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ participantEmail: user?.email ?? "" }),
         }
       );
 
@@ -170,7 +168,7 @@ export default function JoinedEventsPage() {
               Could not load your joined events.
             </p>
             <p className="mt-1 text-sm text-rose-600/80 dark:text-rose-400/70">
-              Make sure the Social Care API server is running, then try again.
+              Please try again in a moment.
             </p>
 
             <Button

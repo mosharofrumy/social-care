@@ -20,6 +20,48 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## JWTs for API clients
+
+The app uses Better Auth sessions for its browser login flow. The JWT plugin is
+available when an authenticated client needs a bearer token for an API:
+
+- `GET /api/auth/token` returns a short-lived JWT for the signed-in user. The
+  request must include the user's Better Auth session cookie.
+- `GET /api/auth/jwks` publishes the public keys services can use to verify
+  tokens. Keep private signing keys in the Better Auth database; never share
+  them with clients.
+
+For example, after the user signs in:
+
+```ts
+const response = await fetch("/api/auth/token", {
+  credentials: "include",
+});
+
+if (!response.ok) {
+  throw new Error("Unable to get an access token");
+}
+
+const { token } = (await response.json()) as { token: string };
+```
+
+Pass the token in the API request's `Authorization` header. Validate its
+signature and audience (`social-care-api`) using the JWKS endpoint.
+Tokens expire after 15 minutes by default. Keep tokens in memory rather than
+persistent browser storage. The existing cookie-based session flow remains the
+default for this app's browser pages.
+
+## Events API
+
+Event data is served from this app's `/api/events` routes and stored in the
+MongoDB `socialcare.events` collection. Reading events is public. Creating,
+joining, leaving, editing, and deleting events use the Better Auth session
+cookie or a valid Better Auth JWT in `Authorization: Bearer <token>`; edit and
+delete requests are restricted to the event organizer. Get a JWT from
+`GET /api/auth/token` using the signed-in session. The API validates its
+signature, issuer, audience, and expiration against Better Auth's JWKS before
+using the token's subject to load the current user.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

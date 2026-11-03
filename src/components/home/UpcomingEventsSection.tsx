@@ -62,7 +62,7 @@ export default function UpcomingEventsSection() {
               Could not load events.
             </p>
             <p className="mt-1 text-sm text-rose-600/80 dark:text-rose-400/70">
-              Make sure the Social Care API server is running, then try again.
+              Please try again in a moment.
             </p>
 
             <button

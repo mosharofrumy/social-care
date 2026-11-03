@@ -3,8 +3,7 @@
  * All project types live in the `src/types` folder (import via `@/types`).
  */
 
-export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000";
+export const API_BASE_URL = "/api";
 
 /** Local today as YYYY-MM-DD (timezone-safe). */
 export function todayISO() {

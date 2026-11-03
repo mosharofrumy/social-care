@@ -46,11 +46,7 @@ export default function CreateEventPage() {
       const response = await fetch(`${API_BASE_URL}/events`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...payload,
-          organizerName: user?.name ?? "",
-          organizerEmail: user?.email ?? "",
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -66,7 +62,7 @@ export default function CreateEventPage() {
       setRequestError(
         err instanceof Error
           ? err.message
-          : "Could not connect to the server. Is the Social Care API running?"
+          : "Could not connect to the event service."
       );
     } finally {
       setPublishing(false);

@@ -94,10 +94,7 @@ export default function EditEventPage() {
       const response = await fetch(`${API_BASE_URL}/events/${event._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...payload,
-          organizerEmail: user?.email ?? "",
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -113,7 +110,7 @@ export default function EditEventPage() {
       setRequestError(
         err instanceof Error
           ? err.message
-          : "Could not connect to the server. Is the Social Care API running?"
+          : "Could not connect to the event service."
       );
       setSaving(false);
     }
@@ -146,7 +143,7 @@ export default function EditEventPage() {
               Could not load this event.
             </p>
             <p className="mt-1 text-sm text-rose-600/80 dark:text-rose-400/70">
-              Make sure the Social Care API server is running, then try again.
+              Please try again in a moment.
             </p>
 
             <Button

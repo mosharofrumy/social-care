@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import EventForm from "@/components/events/EventForm";
 import { API_BASE_URL } from "@/lib/api";
-import { authClient } from "@/lib/auth-client";
 import type {
   EditEventDialogProps,
   EventFormPayload,
@@ -30,8 +29,6 @@ export default function EditEventDialog({
   onOpenChange,
   onSaved,
 }: EditEventDialogProps) {
-  const { data: session } = authClient.useSession();
-
   const [saving, setSaving] = React.useState(false);
   const [requestError, setRequestError] = React.useState<string | null>(null);
 
@@ -43,10 +40,7 @@ export default function EditEventDialog({
       const response = await fetch(`${API_BASE_URL}/events/${event._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...payload,
-          organizerEmail: session?.user?.email ?? "",
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -64,7 +58,7 @@ export default function EditEventDialog({
       setRequestError(
         err instanceof Error
           ? err.message
-          : "Could not connect to the server. Is the Social Care API running?"
+          : "Could not connect to the event service."
       );
     } finally {
       setSaving(false);
